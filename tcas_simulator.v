@@ -89,10 +89,10 @@ begin
         end
         TRAFFIC:
         begin
-            if(threat_detection(px, py, pz, vx, vy, vz) > LEVEL_1_THRESHOLD)
-                NS = TRAFFIC;
-            else if(threat_detection(px, py, pz, vx, vy, vz) > LEVEL_2_THRESHOLD)
+            if(threat_detection(px, py, pz, vx, vy, vz) > LEVEL_2_THRESHOLD)
                 NS = RESOLUTION;
+            else if(threat_detection(px, py, pz, vx, vy, vz) > LEVEL_1_THRESHOLD)
+                NS = TRAFFIC;
             else
                 NS = ALL_CLEAR;      
         end
@@ -119,10 +119,10 @@ begin
         end
         TRAFFIC:
         begin
-            if(threat_detection(px, py, pz, vx, vy, vz) > LEVEL_1_THRESHOLD)
-                tcas_level = LEVEL_1;
-            else if(threat_detection(px, py, pz, vx, vy, vz) > LEVEL_2_THRESHOLD)
+            if(threat_detection(px, py, pz, vx, vy, vz) > LEVEL_2_THRESHOLD)
                 tcas_level = LEVEL_2;
+            else if(threat_detection(px, py, pz, vx, vy, vz) > LEVEL_1_THRESHOLD)
+                tcas_level = LEVEL_1;
             else
                 ;
         end
