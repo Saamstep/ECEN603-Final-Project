@@ -1,3 +1,5 @@
 simv
 *.key
 verdi_config_file
+csrc
+simv.daidir
