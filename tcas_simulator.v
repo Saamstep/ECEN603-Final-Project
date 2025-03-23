@@ -9,13 +9,14 @@
 */
 
 module tcas_simulator(
-    input clk, om,                     // Clock & Operation Mode Bit
-    input [15:0] p1x, p1y, p1z,        // Position 1 Vector
-    input [15:0] v1x, v1y, v1z,        // Velocity 1 Vector
-    input [31:0] p2x, p2y, p2z,        // Position 2 Vector
-    input [31:0] v2x, v2y, v2z,        // Velocity 2 Vector
-    output reg [2:0] tcas_resolution,  // Advise Maneuver Output
-    output reg [2:0] tcas_traffic      // Alerts if Advisory
+    input clk, om,                                 // Clock & Operation Mode Bit
+    input wire signed [15:0] p1x, p1y, p1z,        // Position 1 Vector
+    input wire signed [15:0] v1x, v1y, v1z,        // Velocity 1 Vector
+    input wire signed [31:0] p2x, p2y, p2z,        // Position 2 Vector
+    input wire signed [31:0] v2x, v2y, v2z,        // Velocity 2 Vector
+    input wire signed [31:0] altitude,             // "Aircraft" altitude
+    output reg [2:0] tcas_resolution,              // Advise Maneuver Output
+    output reg [2:0] tcas_traffic                  // Alerts if Advisory
 );
 
 // +==========[ STATE CONTROL ]==========+
@@ -167,8 +168,8 @@ parameter RA_RESET   = 3'b000,
         downDifference = (p1_z + downDeviation - p2_z + tca * v2_z);
 
         // abs equivalent
-        if(upDifference < 0) upDifference = upDifference*-1
-        if(downDifference < 0) downDifference = downDifference*-1
+        upDifference = upDifference > 0 ? upDifference : upDifference*-1;
+        downDifference = downDifference > 0 ? downDifference : downDifference*-1;
 
         // Determine the maneuver (climb or descend)
         if (upDifference > downDifference) begin
