@@ -20,111 +20,6 @@ module tcas_simulator(
     output reg [2:0] tcas_traffic                  // Alerts if Advisory
 );
 
-// +==========[ STATE CONTROL ]==========+
-reg [1:0] CS = 0, NS = 0;
-
-// +==========[ STATES ]==========+
-parameter STARTUP   = 2'b00,
-          STANDBY   = 2'b01,
-          OPERATING = 2'b10;
-
-// +==========[ TCAS LEVELS ]==========+
-parameter TRAFFIC_NONE     = 2'b00,
-          TRAFFIC_ADVISORY = 2'b01;
-
-// +==========[ TCAS Operation Modes ]==========+
-parameter OM_RESET   = 2'b00,
-          OM_TA_ONLY = 2'b01,
-          OM_TA_RA   = 2'b10;
-
-// +==========[ TCAS RESOLUTIONS ]==========+
-parameter RA_NONE    = 3'b000,
-          RA_TRIGGER = 3'b001,
-          RA_DESCEND = 3'b010,
-          RA_CLIMB   = 3'b011;
-
-// +==========[ MATH CONSTANTS ]==========+
-integer vmax = 7, amax = 9.8*0.25, react = 5;
-
-reg [2:0] ta, ra; // Advisory Flags
-
-always @(posedge clk or om)
-begin
-    // $display("Current State: %b, OM: %b", CS, om);
-    if(om == OM_RESET) begin
-        CS <= STARTUP; end
-    else begin
-        CS <= NS; end
-end
-
-always @(*)
-begin
-    case(CS)
-        STARTUP: 
-        begin 
-            if(om != OM_RESET)
-                NS <= STANDBY;
-            else
-                NS <= STARTUP; // Stay in startup state
-        end
-        STANDBY:
-        begin
-            if(om == OM_TA_ONLY || om == OM_TA_RA)
-                NS <= OPERATING;
-            else
-                NS <= STANDBY;
-        end
-        OPERATING:
-        begin
-            if(om == OM_TA_RA)
-                NS <= OPERATING;
-            else if(om == OM_TA_ONLY)
-                NS <= OPERATING;
-            else
-                NS <= STANDBY;
-        end
-        default: NS <= STARTUP;
-    endcase
-end
-
-always @(posedge clk)
-begin
-    case(CS)
-        STARTUP: 
-        begin
-            tcas_traffic <= TRAFFIC_NONE;
-            tcas_resolution <= RA_NONE;
-        end
-        STANDBY:
-        begin
-            ta <= 0;
-            ra <= 0;
-        end
-        OPERATING:
-        begin
-            tcas_traffic <= ta;
-            tcas_resolution <= ra;
-
-            if(om == OM_TA_RA)
-            begin
-                threat_detection (p1x, p1y, p1z, p2x, p2y, p2z, v1x, v1y, v1z, v2x, v2y, v2z, altitude, ta, ra);
-                if(ra == RA_TRIGGER)
-                    advise_maneuver (p1x, p1y, p1z, p2x, p2y, p2z, v1x, v1y, v1z, v2x, v2y, v2z, vmax, amax, react, ra);
-            end
-            else if(om == OM_TA_ONLY)
-            begin
-                threat_detection (p1x, p1y, p1z, p2x, p2y, p2z, v1x, v1y, v1z, v2x, v2y, v2z, altitude, ta, ra);
-                // $display("Hello ta = %d, ra = %d", ta, ra);
-            end
-            else
-            ;
-        end
-        default: ;
-    endcase
-end
-
-endmodule
-
 task thresholds(
     input [31:0] altitude,         // 32-bit input representing the altitude
     output reg [31:0] tau_ta_th,   // Output tau_ta_th
@@ -136,7 +31,6 @@ task thresholds(
 );
     integer sl;
 
-    // always@(*)
     begin
         if (altitude < 3280) begin
             sl = 2;
@@ -360,3 +254,110 @@ task threat_detection(
             ;
     end
 endtask
+
+// +==========[ STATE CONTROL ]==========+
+reg [1:0] CS = 0, NS = 0;
+
+// +==========[ STATES ]==========+
+parameter STARTUP   = 2'b00,
+          STANDBY   = 2'b01,
+          OPERATING = 2'b10;
+
+// +==========[ TCAS LEVELS ]==========+
+parameter TRAFFIC_NONE     = 2'b00,
+          TRAFFIC_ADVISORY = 2'b01;
+
+// +==========[ TCAS Operation Modes ]==========+
+parameter OM_RESET   = 2'b00,
+          OM_TA_ONLY = 2'b01,
+          OM_TA_RA   = 2'b10;
+
+// +==========[ TCAS RESOLUTIONS ]==========+
+parameter RA_NONE    = 3'b000,
+          RA_TRIGGER = 3'b001,
+          RA_DESCEND = 3'b010,
+          RA_CLIMB   = 3'b011;
+
+// +==========[ MATH CONSTANTS ]==========+
+integer vmax = 7, amax = 9.8*0.25, react = 5;
+
+reg [2:0] ta, ra; // Advisory Flags
+
+always @(posedge clk or negedge om)
+begin
+    // $display("Current State: %b, OM: %b", CS, om);
+    if(om == OM_RESET) begin
+        CS <= STARTUP; end
+    else begin
+        CS <= NS; end
+end
+
+always @(*)
+begin
+    case(CS)
+        STARTUP: 
+        begin 
+            if(om != OM_RESET)
+                NS <= STANDBY;
+            else
+                NS <= STARTUP; // Stay in startup state
+        end
+        STANDBY:
+        begin
+            if(om == OM_TA_ONLY || om == OM_TA_RA)
+                NS <= OPERATING;
+            else
+                NS <= STANDBY;
+        end
+        OPERATING:
+        begin
+            if(om == OM_TA_RA)
+                NS <= OPERATING;
+            else if(om == OM_TA_ONLY)
+                NS <= OPERATING;
+            else
+                NS <= STANDBY;
+        end
+        default: NS <= STARTUP;
+    endcase
+end
+
+always @(posedge clk)
+begin
+    case(CS)
+        STARTUP: 
+        begin
+            tcas_traffic <= TRAFFIC_NONE;
+            tcas_resolution <= RA_NONE;
+        end
+        STANDBY:
+        begin
+            ta = 0;
+            ra = 0;
+        end
+        OPERATING:
+        begin
+            tcas_traffic <= ta;
+            tcas_resolution <= ra;
+
+            if(om == OM_TA_RA)
+            begin
+                threat_detection (p1x, p1y, p1z, p2x, p2y, p2z, v1x, v1y, v1z, v2x, v2y, v2z, altitude, ta, ra);
+                if(ra == RA_TRIGGER)
+                    advise_maneuver (p1x, p1y, p1z, p2x, p2y, p2z, v1x, v1y, v1z, v2x, v2y, v2z, vmax, amax, react, ra);
+            end
+            else if(om == OM_TA_ONLY)
+            begin
+                threat_detection (p1x, p1y, p1z, p2x, p2y, p2z, v1x, v1y, v1z, v2x, v2y, v2z, altitude, ta, ra);
+                // $display("Hello ta = %d, ra = %d", ta, ra);
+            end
+            else
+            ;
+        end
+        default: ;
+    endcase
+end
+
+endmodule
+
+
