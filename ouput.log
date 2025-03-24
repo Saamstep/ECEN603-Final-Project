@@ -1,0 +1,28 @@
+Chronologic VCS simulator copyright 1991-2023
+Contains Synopsys proprietary information.
+Compiler version V-2023.12-SP1-1_Full64; Runtime version V-2023.12-SP1-1_Full64;  Mar 23 19:01 2025
++=========[RESET]=========+
+traffic_advisory (TA) = x, resolution_advisory (RA) = x @ t =                    0
+traffic_advisory (TA) = 0, resolution_advisory (RA) = 0 @ t =                   10
++=========[TEST 1]=========+
+No change so monitor won't print.
++=========[TEST 2]=========+
+traffic_advisory (TA) = 1, resolution_advisory (RA) = 0 @ t =                  230
++=========[TEST 3]=========+
+traffic_advisory (TA) = 1, resolution_advisory (RA) = 2 @ t =                  330
++=========[TEST 4]=========+
+traffic_advisory (TA) = 1, resolution_advisory (RA) = 3 @ t =                  430
++=========[TEST 5]=========+
+traffic_advisory (TA) = 1, resolution_advisory (RA) = 2 @ t =                  530
++=========[TEST 6]=========+
+No change so monitor won't print.
++=========[TEST 7]=========+
+No change so monitor won't print.
++=========[TEST 8]=========+
+traffic_advisory (TA) = 1, resolution_advisory (RA) = 3 @ t =                  830
+$finish called from file "tcas_simulator_tb.v", line 122.
+$finish at simulation time                 1000
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 1000
+CPU Time:      0.180 seconds;       Data structure size:   0.0Mb
+Sun Mar 23 19:01:07 2025
