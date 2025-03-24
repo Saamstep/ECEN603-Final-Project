@@ -76,7 +76,6 @@ begin
         end
         OPERATING:
         begin
-            $display("In Operating");
             if(om == OM_TA_RA)
                 NS <= OPERATING;
             else if(om == OM_TA_ONLY)
